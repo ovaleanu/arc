@@ -57,7 +57,7 @@ $ kind create cluster --config cluster.yaml
 After the cluster is created you can install the CNI
 
 ```
-kubectl apply -f https://docs.projectcalico.org/v3.16/manifests/calico.yaml
+$ kubectl apply -f https://docs.projectcalico.org/v3.16/manifests/calico.yaml
 ```
 
 You kind cluster should be up and running
@@ -163,7 +163,7 @@ $ az connectedk8s connect --name $arcClusterName --resource-group $resourceGroup
 Azure Arc pods are running in `azure-arc` namespace
 
 ```
-kubectl get pods --all-namespaces
+$ kubectl get pods --all-namespaces
 NAMESPACE            NAME                                         READY   STATUS    RESTARTS   AGE
 azure-arc            cluster-metadata-operator-c65fcd8c5-k855r    2/2     Running   0          14h
 azure-arc            clusteridentityoperator-769b8b4b4d-vwc9x     3/3     Running   1          14h
@@ -191,3 +191,111 @@ local-path-storage   local-path-provisioner-78776bfc44-plpdd      1/1     Runnin
 The cluster is visible on Azure Arc portal as well
 
 ![](https://github.com/ovaleanujnpr/arc/blob/master/images/image1.png)
+
+### Configure Azure Policy
+
+To configure Azure Policy you need to install [Azure Policy Add-on for Azure Arc enabled Kubernetes](https://docs.microsoft.com/en-gb/azure/governance/policy/concepts/policy-for-kubernetes#install-azure-policy-add-on-for-azure-arc-enabled-kubernetes).
+
+Enable the Microsoft.PolicyInsights resource provider
+
+```
+$ az provider register --namespace 'Microsoft.PolicyInsights'
+
+$ az provider show -n Microsoft.PolicyInsights -o table
+Namespace                 RegistrationPolicy    RegistrationState
+------------------------  --------------------  -------------------
+Microsoft.PolicyInsights  RegistrationRequired  Registered
+```
+
+Create a Service Principal
+
+```
+$ az ad sp create-for-rbac --role "Policy Insights Data Writer (Preview)" --scopes "/subscriptions/<subscriptionId>/resourceGroups/ov-kind-arc/providers/Microsoft.Kubernetes/connectedClusters/ov-kind"
+```
+
+_Note_ Replace <subscriptionId> with your subscription ID
+
+Add the Azure Policy Add-on repo to Helm:
+
+```
+$ helm repo add azure-policy https://raw.githubusercontent.com/Azure/azure-policy/master/extensions/policy-addon-kubernetes/helm-charts
+```
+
+Install the Azure Policy Add-on using Helm Chart:
+
+```
+$ helm install azure-policy-addon azure-policy/azure-policy-addon-arc-clusters \
+    --set azurepolicy.env.resourceid=/subscriptions/<subscriptionId>/resourceGroups/ov-kind-arc/providers/Microsoft.Kubernetes/connectedClusters/ov-kind \
+    --set azurepolicy.env.clientid=<ServicePrincipalAppId> \
+    --set azurepolicy.env.clientsecret=<ServicePrincipalPassword> \
+    --set azurepolicy.env.tenantid=<ServicePrincipalTenantId>
+
+_Note_ Replace <ServicePrincipalAppId>, <ServicePrincipalPassword> and <ServicePrincipalTenantId> with the values from the output of creating the Service Principal previously
+
+Check if installation was successful and that the azure-policy and gatekeeper pods are running
+
+```
+$ kubectl get pods -n kube-system
+NAME                                         READY   STATUS    RESTARTS   AGE
+azure-policy-798977b44d-9w4sj                1/1     Running   0          3h14m
+azure-policy-webhook-685d956678-tmhzx        1/1     Running   0          3h14m
+calico-kube-controllers-7d569d95-fs6kx       1/1     Running   0          18h
+calico-node-ddhfl                            1/1     Running   0          18h
+calico-node-qbckv                            1/1     Running   0          18h
+calico-node-tvnw9                            1/1     Running   0          18h
+coredns-f9fd979d6-dtw4w                      1/1     Running   0          18h
+coredns-f9fd979d6-qk48t                      1/1     Running   0          18h
+etcd-kind-control-plane                      1/1     Running   0          18h
+kube-apiserver-kind-control-plane            1/1     Running   0          18h
+kube-controller-manager-kind-control-plane   1/1     Running   1          18h
+kube-proxy-csrzt                             1/1     Running   0          18h
+kube-proxy-d77g9                             1/1     Running   0          18h
+kube-proxy-llsmw                             1/1     Running   0          18h
+kube-scheduler-kind-control-plane            1/1     Running   1          18h
+
+$ kubectl get pods -n gatekeeper-system
+NAME                                            READY   STATUS    RESTARTS   AGE
+gatekeeper-controller-manager-76cdc6f4c-4rn7p   1/1     Running   1          3h15m
+```
+
+Assign the 'Kubernetes cluster pod security baseline standards for Linux-based workloads' built-in initiative following these [steps](https://docs.microsoft.com/en-gb/azure/governance/policy/concepts/policy-for-kubernetes#assign-a-built-in-policy-definition).
+
+After aproximately 20' the initiative is synced with the cluster
+
+```
+kubectl get constrainttemplate
+NAME                                     AGE
+k8sazureallowedcapabilities              30m
+k8sazureblockhostnamespace               30m
+k8sazurecontainernoprivilege             30m
+k8sazurehostfilesystem                   30m
+k8sazurehostnetworkingports              30m
+```
+
+![](https://github.com/ovaleanujnpr/arc/blob/master/images/image2.png)
+
+![](https://github.com/ovaleanujnpr/arc/blob/master/images/image3.png)
+
+
+
+This initiative has a policy not to allow running priviledge pods. You can validate this running the following priviledge pod.
+
+```
+$ cat nginx-priviledge.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-privileged
+spec:
+  containers:
+    - name: nginx-privileged
+      image: nginx
+      securityContext:
+        privileged: true
+
+$ kubectl apply -f nginx-priviledge.yaml
+```
+
+The pod should not be able to be created due to the policy enforcement.
+
+_Note_ If your cluster is 1.19 this version is not supported yet, https://github.com/Azure/AKS/issues/1869.
