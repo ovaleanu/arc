@@ -299,4 +299,4 @@ $ kubectl apply -f nginx-priviledge.yaml
 
 The pod should not be able to be created due to the policy enforcement.
 
-_Note_ If your cluster is 1.19 this version is not supported yet, https://github.com/Azure/AKS/issues/1869.
+_Note_ If your cluster is 1.19, this version is not supported yet https://github.com/Azure/AKS/issues/1869.
