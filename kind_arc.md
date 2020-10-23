@@ -19,7 +19,16 @@ I will connect a simple Kind cluster running on my Macbook to Azure Arc.
 
 ### Prerequisites
 
-[az CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) installed on your laptop and az account set.
+You need the Azure CLI version 2.12.0 or later installed and configured. Run az --version to find the version. If you need to install or upgrade, see [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
+
+```
+$ az --version
+azure-cli                         2.12.1 *
+
+core                              2.12.1 *
+telemetry                          1.0.6
+```
+
 
 A Kind cluster running on your Macbook. To install Kind follow the instalaltion guide from [here](https://kind.sigs.k8s.io/docs/user/quick-start/).
 The kind configuration on my cluster is very simple.
@@ -80,6 +89,8 @@ kube-scheduler-kind-control-plane            1/1     Running   1          14h
 You will also need Helm v3 installed. For installation details, check [here](https://helm.sh/docs/intro/install/#from-homebrew-macos).
 
 ### Connect Kind to Azure Arc
+
+To connect a Kubernetes cluster to Azure, the cluster administrator needs to deploy agents. These agents run in a Kubernetes namespace named `azure-arc` and are standard Kubernetes deployments. The agents are responsible for connectivity to Azure, collecting Azure Arc logs and metrics, and watching for configuration requests.
 
 First you need to register Arc resource providers.
 
@@ -149,7 +160,7 @@ Connect the cluster to Azure Arc
 $ az connectedk8s connect --name $arcClusterName --resource-group $resourceGroup
 ```
 
-Azure Arc resources will be installed in `azure-arc` namespace
+Azure Arc pods are running in `azure-arc` namespace
 
 ```
 kubectl get pods --all-namespaces
