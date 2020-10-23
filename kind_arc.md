@@ -231,6 +231,7 @@ $ helm install azure-policy-addon azure-policy/azure-policy-addon-arc-clusters \
     --set azurepolicy.env.tenantid=<ServicePrincipalTenantId>
 
 _Note_ Replace <ServicePrincipalAppId>, <ServicePrincipalPassword> and <ServicePrincipalTenantId> with the values from the output of creating the Service Principal previously
+```
 
 Check if installation was successful and that the azure-policy and gatekeeper pods are running
 
@@ -260,7 +261,7 @@ gatekeeper-controller-manager-76cdc6f4c-4rn7p   1/1     Running   1          3h1
 
 Assign the 'Kubernetes cluster pod security baseline standards for Linux-based workloads' built-in initiative following these [steps](https://docs.microsoft.com/en-gb/azure/governance/policy/concepts/policy-for-kubernetes#assign-a-built-in-policy-definition).
 
-After aproximately 20' the initiative is synced with the cluster
+After aproximately 20 minutes the initiative is synced with the cluster
 
 ```
 kubectl get constrainttemplate
