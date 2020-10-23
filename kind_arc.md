@@ -148,3 +148,35 @@ Connect the cluster to Azure Arc
 ```
 $ az connectedk8s connect --name $arcClusterName --resource-group $resourceGroup
 ```
+
+Azure Arc resources will be installed in `azure-arc` namespace
+
+```
+kubectl get pods --all-namespaces
+NAMESPACE            NAME                                         READY   STATUS    RESTARTS   AGE
+azure-arc            cluster-metadata-operator-c65fcd8c5-k855r    2/2     Running   0          14h
+azure-arc            clusteridentityoperator-769b8b4b4d-vwc9x     3/3     Running   1          14h
+azure-arc            config-agent-6dbbcdfb84-2gsjj                3/3     Running   0          14h
+azure-arc            controller-manager-5fdc98b965-96ckn          3/3     Running   1          14h
+azure-arc            flux-logs-agent-59b5f6c66f-sqdml             2/2     Running   0          14h
+azure-arc            metrics-agent-5464649849-sffml               2/2     Running   0          14h
+azure-arc            resource-sync-agent-54ff8dd988-rxdcq         3/3     Running   0          14h
+kube-system          calico-kube-controllers-7d569d95-fs6kx       1/1     Running   0          14h
+kube-system          calico-node-ddhfl                            1/1     Running   0          14h
+kube-system          calico-node-qbckv                            1/1     Running   0          14h
+kube-system          calico-node-tvnw9                            1/1     Running   0          14h
+kube-system          coredns-f9fd979d6-dtw4w                      1/1     Running   0          14h
+kube-system          coredns-f9fd979d6-qk48t                      1/1     Running   0          14h
+kube-system          etcd-kind-control-plane                      1/1     Running   0          14h
+kube-system          kube-apiserver-kind-control-plane            1/1     Running   0          14h
+kube-system          kube-controller-manager-kind-control-plane   1/1     Running   1          14h
+kube-system          kube-proxy-csrzt                             1/1     Running   0          14h
+kube-system          kube-proxy-d77g9                             1/1     Running   0          14h
+kube-system          kube-proxy-llsmw                             1/1     Running   0          14h
+kube-system          kube-scheduler-kind-control-plane            1/1     Running   1          14h
+local-path-storage   local-path-provisioner-78776bfc44-plpdd      1/1     Running   0          14h
+```
+
+The cluster is visible on Azure Arc portal as well
+
+![](https://github.com/ovaleanujnpr/arc/blob/master/images/image1.png)
