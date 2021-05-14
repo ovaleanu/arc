@@ -2,7 +2,7 @@
 
 Azure Arc is part of the Microsoft strategy for hybrid cloud deployments and management. With Azure Arc you can now manage virtual machines, Kubernetes clusters, and databases as if they are running in Azure.
 
-![](https://github.com/ovaleanujnpr/arc/blob/master/images/azure-arc-control-plane.png)
+![](https://github.com/ovaleanu/arc/blob/master/images/azure-arc-control-plane.png)
 
 Now Azure Arc allows to manage the following resources outside of Azure:
 
@@ -191,7 +191,7 @@ local-path-storage   local-path-provisioner-78776bfc44-plpdd      1/1     Runnin
 
 The cluster is visible on Azure Arc portal as well
 
-![](https://github.com/ovaleanujnpr/arc/blob/master/images/image1.png)
+![](https://github.com/ovaleanu/arc/blob/master/images/image1.png)
 
 ### Configure Azure Policy
 
@@ -274,9 +274,9 @@ k8sazurehostfilesystem                   30m
 k8sazurehostnetworkingports              30m
 ```
 
-![](https://github.com/ovaleanujnpr/arc/blob/master/images/image2.png)
+![](https://github.com/ovaleanu/arc/blob/master/images/image2.png)
 
-![](https://github.com/ovaleanujnpr/arc/blob/master/images/image3.png)
+![](https://github.com/ovaleanu/arc/blob/master/images/image3.png)
 
 
 
